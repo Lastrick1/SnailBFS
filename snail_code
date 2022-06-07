@@ -1,0 +1,48 @@
+# Iterate through each snail to find shortest distance from its starting location to a finish line ("#")
+# Starting locations are returned in the format [x, y, 0], where 0 is the number of steps so far
+for i in range(number_snails):
+    start_coords = find_start(map, map_height, map_width, i+1)
+    #print("Snail " + str(i+1) + " starts at " + str(start_coords), file=sys.stderr, flush=True)
+
+    # Create a new queue, initialize traveled map
+    q = queue.Queue()
+    traveled = [[" "] * map_width for i in range(map_height)]
+
+    # Place starting coords in queue
+    q.put(start_coords)
+    notFound = True   # Snail has not found a finish spot yet
+    numSteps = 0      # No steps
+
+    # While the finish has not been reached and there are still items in the queue
+    while (notFound and q.qsize() > 0):
+        # Get next item in the queue
+        nextLoc = q.get()
+        x = int(nextLoc[0]) # Parse the location and number of steps
+        y = int(nextLoc[1])
+        numSteps = int(nextLoc[2])
+        #print("Looking at " + str(nextLoc), file=sys.stderr, flush=True)
+
+        # Check if this location is a finish line
+        if (map[y][x] == "#"): 
+            notFound = False
+            #print("FOUND in " + str(numSteps) + " steps.", file=sys.stderr, flush=True)
+        else: # If not at finish
+            # Increment step counter
+            numSteps += 1
+
+            # Mark on traveled map that this location has been visited
+            traveled[y][x] = "X"
+
+            # Look in four directions around current position, if valid location ...
+            # see if the snail can move here (not visited), add it to the queue
+            if (x > 0): # Check left
+                if (traveled[y][x-1] != "X"): q.put([x-1, y, numSteps])
+            if (x < map_width - 1): # Check right
+                if (traveled[y][x+1] != "X"): q.put([x+1, y, numSteps])
+            if (y > 0): # Check up
+                if (traveled[y-1][x] != "X"): q.put([x, y-1, numSteps])
+            if (y < map_height - 1): # Check down
+                if (traveled[y+1][x] != "X"): q.put([x, y+1, numSteps])
+
+    # Assuming a finish spot has been found, set distance for each snail
+    dist[i] = numSteps
